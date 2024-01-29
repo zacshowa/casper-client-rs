@@ -7,7 +7,7 @@ pub fn create_transaction(
     allow_unsigned_deploy: bool,
 ) -> Result<TransactionV1, CliError> {
     let chain_name = transaction_params.chain_name.to_string();
-    if transaction_params.payment_amount.is_empty(){
+    if transaction_params.payment_amount.is_empty() {
         return Err(CliError::InvalidArgument {
             context: "create_transaction (payment_amount)",
             error: "payment_amount is required".to_string(),
@@ -88,6 +88,24 @@ pub fn make_transaction(
     let output = parse::output_kind(transaction_params.maybe_output_path, force);
     let transaction = create_transaction(builder_params, transaction_params, true)?;
     crate::output_transaction(output, &transaction).map_err(CliError::from)
+}
+
+/// Reads a previously-saved [`TransactionV1`] from a file, cryptographically signs it, and outputs it to a
+/// file or stdout.
+///
+/// `maybe_output_path` specifies the output file path, or if empty, will print it to `stdout`.  If
+/// `force` is true, and a file exists at `maybe_output_path`, it will be overwritten.  If `force`
+/// is false and a file exists at `maybe_output_path`, [`Error::FileAlreadyExists`] is returned
+/// and the file will not be written.
+pub fn sign_transaction_file(
+    input_path: &str,
+    secret_key_path: &str,
+    maybe_output_path: &str,
+    force: bool,
+) -> Result<(), CliError> {
+    let output = parse::output_kind(maybe_output_path, force);
+    let secret_key = parse::secret_key_from_file(secret_key_path)?;
+    crate::sign_transaction_file(input_path, &secret_key, output).map_err(CliError::from)
 }
 
 pub fn make_transaction_builder(
