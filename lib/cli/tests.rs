@@ -437,6 +437,80 @@ mod transaction {
         bytesrepr::Bytes, PackageAddr, TransactionEntryPoint, TransactionInvocationTarget,
         TransactionRuntime, TransactionSessionKind, TransactionTarget, TransactionV1BuilderError,
     };
+    const SAMPLE_TRANSACTION: &str = r#"{
+  "hash": "f868596bbfd729547ffa25c3421df29d6650cec73e9fe3d0aff633fe2d6ac952",
+  "header": {
+    "chain_name": "test",
+    "timestamp": "2024-01-26T19:08:53.498Z",
+    "ttl": "30m",
+    "body_hash": "fb94fd83178e3acf22546beebf5f44692499d681c4381f6d145d85ff9b5fc152",
+    "pricing_mode": {
+      "GasPriceMultiplier": 1
+    },
+    "payment_amount": 10,
+    "initiator_addr": {
+      "PublicKey": "01722e1b3d31bef0ba832121bd2941aae6a246d0d05ac95aa16dd587cc5469871d"
+    }
+  },
+  "body": {
+    "args": [
+      [
+        "source",
+        {
+          "cl_type": "URef",
+          "bytes": "722e1b3d31bef0ba832121bd2941aae6a246d0d05ac95aa16dd587cc5469871d01",
+          "parsed": "uref-722e1b3d31bef0ba832121bd2941aae6a246d0d05ac95aa16dd587cc5469871d-001"
+        }
+      ],
+      [
+        "target",
+        {
+          "cl_type": "URef",
+          "bytes": "722e1b3d31bef0ba832121bd2941aae6a246d0d05ac95aa16dd587cc5469871d01",
+          "parsed": "uref-722e1b3d31bef0ba832121bd2941aae6a246d0d05ac95aa16dd587cc5469871d-001"
+        }
+      ],
+      [
+        "amount",
+        {
+          "cl_type": "U512",
+          "bytes": "010a",
+          "parsed": "10"
+        }
+      ]
+    ],
+    "target": "Native",
+    "entry_point": "Transfer",
+    "scheduling": "Standard"
+  },
+  "approvals": []
+}
+"#;
+
+    #[test]
+    fn should_sign_transaction() {
+        let bytes = SAMPLE_TRANSACTION.as_bytes();
+        let transaction = crate::read_transaction(bytes).unwrap();
+        assert_eq!(
+            transaction.approvals().len(),
+            0,
+            "Sample transaction should have 0 approvals."
+        );
+
+        let tempdir = tempfile::tempdir().unwrap();
+        let path = tempdir.path().join("deploy.json");
+
+        crate::output_transaction(OutputKind::file(&path, false), &transaction).unwrap();
+
+        let secret_key = SecretKey::generate_ed25519().unwrap();
+        crate::sign_transaction_file(&path, &secret_key, OutputKind::file(&path, true)).unwrap();
+        let signed_transaction = crate::read_transaction_file(&path).unwrap();
+
+        assert_eq!(
+            signed_transaction.approvals().len(),
+            transaction.approvals().len() + 1,
+        );
+    }
 
     #[test]
     fn should_create_add_bid_transaction() {
@@ -466,11 +540,8 @@ mod transaction {
             amount,
         };
 
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
 
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "add-bid-test");
@@ -526,11 +597,8 @@ mod transaction {
             amount,
         };
 
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
 
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "delegate");
@@ -584,11 +652,8 @@ mod transaction {
         let transaction_builder_params =
             TransactionBuilderParams::WithdrawBid { public_key, amount };
 
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
 
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "withdraw-bid");
@@ -639,11 +704,8 @@ mod transaction {
             amount,
         };
 
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
 
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "undelegate");
@@ -706,11 +768,8 @@ mod transaction {
             amount,
             new_validator: PublicKey::from(&new_validator_secret_key),
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "redelegate");
         assert_eq!(
@@ -774,11 +833,8 @@ mod transaction {
             entity_addr,
             entry_point: "test-entry-point",
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
 
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(
@@ -815,11 +871,8 @@ mod transaction {
             entity_alias: "alias",
             entry_point: "entry-point-alias",
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(
             transaction.as_ref().unwrap().chain_name(),
@@ -861,11 +914,8 @@ mod transaction {
             entry_point,
             maybe_entity_version,
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "package");
         assert_eq!(
@@ -904,11 +954,8 @@ mod transaction {
             entry_point,
             maybe_entity_version,
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "package");
         assert_eq!(
@@ -942,11 +989,8 @@ mod transaction {
             transaction_bytes,
             entry_point: "entry-point-session",
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "session");
         assert_eq!(
@@ -989,11 +1033,8 @@ mod transaction {
             maybe_to: None,
             maybe_id: None,
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
         assert!(transaction.is_ok(), "{:?}", transaction);
         assert_eq!(transaction.as_ref().unwrap().chain_name(), "transfer");
         assert_eq!(
@@ -1030,11 +1071,8 @@ mod transaction {
             maybe_to: None,
             maybe_id: None,
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
         assert!(transaction.is_err());
         assert!(matches!(
             transaction.unwrap_err(),
@@ -1062,11 +1100,8 @@ mod transaction {
             delegation_rate: 0,
             amount: U512::from(10),
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            true,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, true);
         assert!(transaction.is_ok(), "{:?}", transaction);
         println!("{:?}", transaction);
     }
@@ -1090,11 +1125,8 @@ mod transaction {
             delegation_rate: 0,
             amount: U512::from(10),
         };
-        let transaction = create_transaction(
-            transaction_builder_params,
-            transaction_string_params,
-            false,
-        );
+        let transaction =
+            create_transaction(transaction_builder_params, transaction_string_params, false);
         assert!(transaction.is_err(), "{:?}", transaction);
         println!("{:?}", transaction);
         assert!(matches!(
