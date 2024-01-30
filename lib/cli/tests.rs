@@ -530,7 +530,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -587,7 +587,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -645,7 +645,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -694,7 +694,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -758,7 +758,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -825,7 +825,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -863,7 +863,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -905,7 +905,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -945,7 +945,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -981,7 +981,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -1022,7 +1022,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
 
@@ -1061,7 +1061,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
         let transaction_builder_params = TransactionBuilderParams::Transfer {
@@ -1092,7 +1092,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
         let transaction_builder_params = TransactionBuilderParams::AddBid {
@@ -1117,7 +1117,7 @@ mod transaction {
             session_args_simple: vec![],
             session_args_json: "",
             maybe_pricing_mode: None,
-            maybe_output_path: "",
+            output_path: "",
             payment_amount: "100",
         };
         let transaction_builder_params = TransactionBuilderParams::AddBid {
