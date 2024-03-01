@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use casper_types::{BlockHash, ProtocolVersion, Transaction, TransactionHash};
 use casper_types::execution::ExecutionResult;
 use casper_types::{BlockHash, ProtocolVersion, Transaction, TransactionHash};
 
