@@ -927,7 +927,12 @@ pub(super) mod add_bid {
 
     const ABOUT: &str = "Creates a new add-bid transaction";
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -975,7 +980,12 @@ pub(super) mod withdraw_bid {
 
     const ABOUT: &str = "Creates a new withdraw-bid transaction";
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1014,7 +1024,12 @@ pub(super) mod delegate {
     const ABOUT: &str = "Creates a new delegate transaction";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1062,7 +1077,12 @@ pub(super) mod undelegate {
     const ABOUT: &str = "Creates a new delegate transaction";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1107,7 +1127,12 @@ pub(super) mod redelegate {
     const ABOUT: &str = "Creates a new delegate transaction";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1389,7 +1414,12 @@ pub(super) mod transfer {
     const ABOUT: &str = "Creates a new native transfer transaction";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1591,7 +1621,10 @@ pub(super) fn apply_common_args(subcommand: Command) -> Command {
     apply_common_creation_options(subcommand, false, false, true)
 }
 
-pub(super) fn build_transaction_str_params(matches: &ArgMatches, obtain_session_args: bool) -> TransactionStrParams {
+pub(super) fn build_transaction_str_params(
+    matches: &ArgMatches,
+    obtain_session_args: bool,
+) -> TransactionStrParams {
     let secret_key = common::secret_key::get(matches).unwrap_or_default();
     let timestamp = timestamp::get(matches);
     let ttl = ttl::get(matches);
@@ -1618,7 +1651,6 @@ pub(super) fn build_transaction_str_params(matches: &ArgMatches, obtain_session_
             payment_amount,
         }
     } else {
-
         TransactionStrParams {
             secret_key,
             timestamp,
@@ -1631,8 +1663,6 @@ pub(super) fn build_transaction_str_params(matches: &ArgMatches, obtain_session_
             ..Default::default()
         }
     }
-
-
 }
 pub(super) fn add_rpc_args(subcommand: Command) -> Command {
     subcommand
