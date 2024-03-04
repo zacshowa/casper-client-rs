@@ -8,8 +8,8 @@ use rand::Rng;
 use casper_types::{
     account::AccountHash, bytesrepr::Bytes, crypto, AddressableEntityHash, AsymmetricType,
     BlockHash, DeployHash, Digest, ExecutableDeployItem, HashAddr, Key, NamedArg, PricingMode,
-    PublicKey, RuntimeArgs, SecretKey, TimeDiff, Timestamp, TransactionV1, UIntParseError, URef,
-    U512,
+    PublicKey, RuntimeArgs, SecretKey, TimeDiff, Timestamp, TransactionHash, TransactionV1,
+    TransactionV1Hash, UIntParseError, URef, U512,
 };
 
 use super::{simple_args, CliError, PaymentStrParams, SessionStrParams};
@@ -815,6 +815,15 @@ pub(super) fn pricing_mode(pricing_mode_str: &str) -> Result<PricingMode, CliErr
     }
 }
 
+pub(super) fn transaction_hash(transaction_hash: &str) -> Result<TransactionHash, CliError> {
+    let digest =
+        Digest::from_hex(transaction_hash).map_err(|error| CliError::FailedToParseDigest {
+            context: "failed to parse digest from string for transaction hash",
+            error,
+        })?;
+    Ok(TransactionHash::from(TransactionV1Hash::from(digest)))
+}
+
 #[cfg(test)]
 mod tests {
     use std::convert::TryFrom;
@@ -1553,6 +1562,35 @@ mod tests {
                 parsed,
                 Err(CliError::InvalidArgument {
                     context: "pricing_mode",
+                    ..
+                })
+            ));
+        }
+    }
+    mod transaction_hash {
+        use super::*;
+        const VALID_HASH: &str = "09dcee4b212cfd53642ab323fbef07dafafc6f945a80a00147f62910a915c4e6";
+        const INVALID_HASH: &str =
+            "09dcee4b212cfd53642ab323fbef07dafafc6f945a80a00147f62910a915c4e";
+        #[test]
+        fn should_parse_transaction_hash() {
+            let parsed = transaction_hash(VALID_HASH);
+            assert!(parsed.is_ok());
+            assert_eq!(
+                parsed.unwrap(),
+                TransactionHash::from(TransactionV1Hash::from(
+                    Digest::from_hex(VALID_HASH).unwrap()
+                ))
+            );
+        }
+        #[test]
+        fn should_fail_to_parse_incorrect_hash() {
+            let parsed = transaction_hash(INVALID_HASH);
+            assert!(parsed.is_err());
+            assert!(matches!(
+                parsed,
+                Err(CliError::FailedToParseDigest {
+                    context: "failed to parse digest from string for transaction hash",
                     ..
                 })
             ));
