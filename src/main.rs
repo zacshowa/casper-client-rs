@@ -31,6 +31,7 @@ use once_cell::sync::Lazy;
 
 use casper_client::{cli, rpcs::results::GetChainspecResult, SuccessResponse};
 
+use crate::transaction::GetTransaction;
 use account_address::AccountAddress;
 use block::{GetBlock, GetBlockTransfers};
 use command::{ClientCommand, Success};
@@ -52,7 +53,7 @@ use keygen::Keygen;
 use list_rpcs::ListRpcs;
 use query_balance::QueryBalance;
 use query_global_state::QueryGlobalState;
-use transaction::{MakeTransaction, PutTransaction, SignTransaction, SendTransaction};
+use transaction::{MakeTransaction, PutTransaction, SendTransaction, SignTransaction};
 
 const APP_NAME: &str = "Casper client";
 
@@ -83,6 +84,7 @@ enum DisplayOrder {
     Transfer,
     MakeTransfer,
     GetDeploy,
+    GetTransaction,
     GetBalance,
     GetBlock,
     GetBlockTransfers,
@@ -121,11 +123,14 @@ fn cli() -> Command {
             DisplayOrder::SignTransaction as usize,
         ))
         .subcommand(SendDeploy::build(DisplayOrder::SendDeploy as usize))
-        .subcommand(SendTransaction::build(DisplayOrder::SendTransaction as usize))
+        .subcommand(SendTransaction::build(
+            DisplayOrder::SendTransaction as usize,
+        ))
         .subcommand(Transfer::build(DisplayOrder::Transfer as usize))
         .subcommand(MakeTransfer::build(DisplayOrder::MakeTransfer as usize))
         .subcommand(GetBalance::build(DisplayOrder::GetBalance as usize).hide(true))
         .subcommand(GetDeploy::build(DisplayOrder::GetDeploy as usize))
+        .subcommand(GetTransaction::build(DisplayOrder::GetTransaction as usize))
         .subcommand(GetBlock::build(DisplayOrder::GetBlock as usize))
         .subcommand(GetBlockTransfers::build(
             DisplayOrder::GetBlockTransfers as usize,
@@ -181,6 +186,7 @@ async fn main() {
         Transfer::NAME => Transfer::run(matches).await,
         MakeTransfer::NAME => MakeTransfer::run(matches).await,
         GetDeploy::NAME => GetDeploy::run(matches).await,
+        GetTransaction::NAME => GetTransaction::run(matches).await,
         GetBalance::NAME => GetBalance::run(matches).await,
         GetBlock::NAME => GetBlock::run(matches).await,
         GetBlockTransfers::NAME => GetBlockTransfers::run(matches).await,
