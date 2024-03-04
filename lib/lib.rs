@@ -59,6 +59,7 @@ use casper_types::{
     Deploy, DeployHash, Digest, Key, SecretKey, Transaction, TransactionHash, TransactionV1, URef,
 };
 
+use crate::rpcs::v2_0_0::get_transaction::;
 pub use error::Error;
 use json_rpc::JsonRpcCall;
 pub use json_rpc::{JsonRpcId, SuccessResponse};
@@ -70,8 +71,8 @@ use rpcs::{
         GetBlockResult, GetBlockTransfersResult, GetChainspecResult, GetDeployResult,
         GetDictionaryItemResult, GetEraInfoResult, GetEraSummaryResult, GetNodeStatusResult,
         GetPeersResult, GetStateRootHashResult, GetTransactionResult, GetValidatorChangesResult, ListRpcsResult,
-        PutDeployResult, PutTransactionResult, QueryBalanceDetailsResult, QueryBalanceResult,
-        QueryGlobalStateResult, SpeculativeExecResult, SpeculativeExecTxnResult,
+        PutDeployResult, PutTransactionResult, QueryBalanceDetailsResult,QueryBalanceResult, QueryGlobalStateResult,
+        SpeculativeExecResult, SpeculativeExecTxnResult,
     },
     v2_0_0::{
         get_account::{AccountIdentifier, GetAccountParams, GET_ACCOUNT_METHOD},
