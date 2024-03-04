@@ -8,8 +8,8 @@ use rand::Rng;
 use casper_types::{
     account::AccountHash, bytesrepr::Bytes, crypto, AddressableEntityHash, AsymmetricType,
     BlockHash, DeployHash, Digest, ExecutableDeployItem, HashAddr, Key, NamedArg, PricingMode,
-    PublicKey, RuntimeArgs, SecretKey, TimeDiff, Timestamp, UIntParseError, URef,
-    U512,
+    PublicKey, RuntimeArgs, SecretKey, TimeDiff, Timestamp, TransactionHash, TransactionV1,
+    TransactionV1Hash, UIntParseError, URef, U512,
 };
 
 use super::{simple_args, CliError, PaymentStrParams, SessionStrParams};
@@ -416,6 +416,25 @@ pub fn transaction_module_bytes(session_path: &str) -> Result<Bytes, CliError> {
     Ok(Bytes::from(module_bytes))
 }
 
+/// Parse a transaction file into a `TransactionV1` to be sent to the network
+pub fn transaction_from_file(transaction_path: &str) -> Result<TransactionV1, CliError> {
+    let transaction_bytes = fs::read(transaction_path).map_err(|error| crate::Error::IoError {
+        context: format!("unable to read transaction file at '{}'", transaction_path),
+        error,
+    })?;
+    let transaction_str =
+        std::str::from_utf8(&transaction_bytes).map_err(|error| crate::Error::Utf8Error {
+            context: "transaction_from_file",
+            error,
+        })?;
+    let transaction: TransactionV1 = serde_json::from_str(transaction_str).map_err(|error| {
+        crate::Error::FailedToDecodeFromJson {
+            context: "transaction",
+            error,
+        }
+    })?;
+    Ok(transaction)
+}
 /// Parses a URef from a formatted string for the purposes of creating transactions.
 pub fn uref(uref_str: &str) -> Result<URef, CliError> {
     match URef::from_formatted_str(uref_str) {
@@ -794,6 +813,15 @@ pub(super) fn pricing_mode(pricing_mode_str: &str) -> Result<PricingMode, CliErr
             }
         }
     }
+}
+
+pub(super) fn transaction_hash(transaction_hash: &str) -> Result<TransactionHash, CliError> {
+    let digest =
+        Digest::from_hex(transaction_hash).map_err(|error| CliError::FailedToParseDigest {
+            context: "failed to parse digest from string for transaction hash",
+            error,
+        })?;
+    Ok(TransactionHash::from(TransactionV1Hash::from(digest)))
 }
 
 #[cfg(test)]
@@ -1534,6 +1562,35 @@ mod tests {
                 parsed,
                 Err(CliError::InvalidArgument {
                     context: "pricing_mode",
+                    ..
+                })
+            ));
+        }
+    }
+    mod transaction_hash {
+        use super::*;
+        const VALID_HASH: &str = "09dcee4b212cfd53642ab323fbef07dafafc6f945a80a00147f62910a915c4e6";
+        const INVALID_HASH: &str =
+            "09dcee4b212cfd53642ab323fbef07dafafc6f945a80a00147f62910a915c4e";
+        #[test]
+        fn should_parse_transaction_hash() {
+            let parsed = transaction_hash(VALID_HASH);
+            assert!(parsed.is_ok());
+            assert_eq!(
+                parsed.unwrap(),
+                TransactionHash::from(TransactionV1Hash::from(
+                    Digest::from_hex(VALID_HASH).unwrap()
+                ))
+            );
+        }
+        #[test]
+        fn should_fail_to_parse_incorrect_hash() {
+            let parsed = transaction_hash(INVALID_HASH);
+            assert!(parsed.is_err());
+            assert!(matches!(
+                parsed,
+                Err(CliError::FailedToParseDigest {
+                    context: "failed to parse digest from string for transaction hash",
                     ..
                 })
             ));
