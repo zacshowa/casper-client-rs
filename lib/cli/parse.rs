@@ -1711,7 +1711,8 @@ mod tests {
                 None,
             );
             assert!(parsed.is_err());
-            assert!(matches!(parsed, Err(CliError::InvalidArgument { .. })));
+            assert!(matches!(parsed, Err(CliError::InvalidArgument { ..
+                })));
         }
     }
     mod transaction_hash {
