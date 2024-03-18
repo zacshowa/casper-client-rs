@@ -6,6 +6,7 @@ pub(crate) mod get_entity;
 pub(crate) mod get_transaction;
 pub(crate) mod put_transaction;
 pub(crate) mod speculative_exec_transaction;
+pub(crate) mod get_node_status;
 
 // The following RPCs are all unchanged from v1.6.0, so we just re-export them.
 
@@ -56,14 +57,6 @@ pub(crate) mod get_era_summary {
     pub use crate::rpcs::v1_6_0::get_era_summary::GetEraSummaryResult;
     pub(crate) use crate::rpcs::v1_6_0::get_era_summary::{
         GetEraSummaryParams, GET_ERA_SUMMARY_METHOD,
-    };
-}
-
-pub(crate) mod get_node_status {
-    pub(crate) use crate::rpcs::v1_6_0::get_node_status::GET_NODE_STATUS_METHOD;
-    pub use crate::rpcs::v1_6_0::get_node_status::{
-        ActivationPoint, AvailableBlockRange, BlockSyncStatus, BlockSynchronizerStatus,
-        GetNodeStatusResult, MinimalBlockInfo, NextUpgrade, ReactorState,
     };
 }
 
