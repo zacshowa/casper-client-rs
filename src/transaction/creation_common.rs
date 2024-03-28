@@ -44,6 +44,8 @@ pub(super) enum DisplayOrder {
     EntityAlias,
     PaymentAmount,
     PricingMode,
+    StrikePrice,
+    StandardPayment,
     Receipt,
     PaidAmount,
     GasPriceTolerance,
@@ -52,6 +54,7 @@ pub(super) enum DisplayOrder {
     NewValidator,
     Delegator,
     EntityAddr,
+    EntityHash,
     RpcId,
     Verbose,
 }
@@ -355,8 +358,57 @@ pub(super) mod paid_amount {
 
     const ARG_VALUE_NAME: &str = common::ARG_INTEGER;
 
-    const ARG_HELP: &str =
-        "The amount previously reserved to pay for the current transaction.";
+    const ARG_HELP: &str = "The amount previously reserved to pay for the current transaction.";
+
+    pub(in crate::transaction) fn arg() -> Arg {
+        Arg::new(ARG_NAME)
+            .long(ARG_NAME)
+            .required(false)
+            .value_name(ARG_VALUE_NAME)
+            .help(ARG_HELP)
+            .display_order(DisplayOrder::StrikePrice as usize)
+    }
+
+    pub fn get(matches: &ArgMatches) -> &str {
+        matches
+            .get_one::<String>(ARG_NAME)
+            .map(String::as_str)
+            .unwrap_or_default()
+    }
+}
+
+pub(super) mod standard_payment {
+    use super::*;
+    pub(in crate::transaction) const ARG_NAME: &str = "standard-payment";
+
+    const ARG_VALUE_NAME: &str = common::ARG_STRING;
+
+    const ARG_HELP: &str = "Standard payment.";
+
+    pub(in crate::transaction) fn arg() -> Arg {
+        Arg::new(ARG_NAME)
+            .long(ARG_NAME)
+            .required(false)
+            .value_name(ARG_VALUE_NAME)
+            .help(ARG_HELP)
+            .display_order(DisplayOrder::StandardPayment as usize)
+    }
+
+    pub fn get(matches: &ArgMatches) -> &str {
+        matches
+            .get_one::<String>(ARG_NAME)
+            .map(String::as_str)
+            .unwrap_or_default()
+    }
+}
+
+pub(super) mod strike_price {
+    use super::*;
+    pub(in crate::transaction) const ARG_NAME: &str = "strike-price";
+
+    const ARG_VALUE_NAME: &str = common::ARG_INTEGER;
+
+    const ARG_HELP: &str = "The gas price at the time of reservation.";
 
     pub(in crate::transaction) fn arg() -> Arg {
         Arg::new(ARG_NAME)
@@ -573,7 +625,7 @@ pub(super) fn apply_common_creation_options(
         .group(
             ArgGroup::new("Fixed Payment")
                 .arg(gas_price_tolerance::ARG_NAME)
-                .required(false)
+                .required(false),
         );
     subcommand
 }
@@ -815,13 +867,13 @@ pub(super) mod session_version {
         *get_result
     }
 }
-mod package_alias_arg {
+mod package_name_arg {
     use super::*;
 
-    pub const ARG_NAME: &str = "transaction-package-alias";
-    pub const ARG_ALIAS: &str = "txn-package-alias";
+    pub const ARG_NAME: &str = "transaction-package-name";
+    pub const ARG_ALIAS: &str = "txn-package-name";
     const ARG_VALUE_NAME: &str = common::ARG_STRING;
-    const ARG_HELP: &str = "The alias for targeting a stored transaction package.";
+    const ARG_HELP: &str = "The name of a stored transaction package.";
 
     pub fn arg() -> Arg {
         Arg::new(ARG_NAME)
@@ -1267,6 +1319,7 @@ pub(super) mod redelegate {
 pub(super) mod invocable_entity {
     use super::*;
     use casper_client::cli::{CliError, TransactionBuilderParams};
+    use casper_types::addressable_entity;
 
     pub const NAME: &str = "invocable-entity";
     const ACCEPT_SESSION_ARGS: bool = true;
@@ -1274,8 +1327,12 @@ pub(super) mod invocable_entity {
     const ABOUT: &str = "Creates a new transaction targeting an invocable entity";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
-
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1294,7 +1351,7 @@ pub(super) mod invocable_entity {
         let entry_point = session_entry_point::get(matches);
 
         let params = TransactionBuilderParams::InvocableEntity {
-            entity_addr,
+            entity_hash: entity_addr.into(), // TODO: Skip `entity_addr` and match directly for hash?
             entry_point,
         };
         let transaction_str_params = build_transaction_str_params(matches, ACCEPT_SESSION_ARGS);
@@ -1318,8 +1375,12 @@ pub(super) mod invocable_entity_alias {
     const ABOUT: &str = "Creates a new transaction targeting an invocable entity via its alias";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
-
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1360,8 +1421,12 @@ pub(super) mod package {
     const ABOUT: &str = "Creates a new transaction targeting a package";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
-
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1381,7 +1446,7 @@ pub(super) mod package {
         let entry_point = session_entry_point::get(matches);
 
         let params = TransactionBuilderParams::Package {
-            package_addr,
+            package_hash: package_addr.into(), // TODO: Skip `package_addr` and match directly for hash?
             maybe_entity_version,
             entry_point,
         };
@@ -1400,15 +1465,19 @@ pub(super) mod package_alias {
     use super::*;
     use casper_client::cli::{CliError, TransactionBuilderParams};
 
-    pub const NAME: &str = "package-alias";
+    pub const NAME: &str = "package-name";
 
     const ACCEPT_SESSION_ARGS: bool = true;
 
     const ABOUT: &str = "Creates a new transaction targeting package via its alias";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
-
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1421,7 +1490,7 @@ pub(super) mod package_alias {
         show_simple_arg_examples_and_exit_if_required(matches);
         show_json_args_examples_and_exit_if_required(matches);
 
-        let package_alias = package_alias_arg::get(matches);
+        let package_alias = package_name_arg::get(matches);
 
         let maybe_entity_version = session_version::get(matches);
 
@@ -1438,7 +1507,7 @@ pub(super) mod package_alias {
 
     fn add_args(add_bid_subcommand: Command) -> Command {
         add_bid_subcommand
-            .arg(package_alias_arg::arg())
+            .arg(package_name_arg::arg())
             .arg(session_version::arg())
             .arg(session_entry_point::arg())
     }
@@ -1455,7 +1524,12 @@ pub(super) mod session {
     const ABOUT: &str = "Creates a new transaction for running session logic";
 
     pub fn build() -> Command {
-        apply_common_creation_options(add_args(Command::new(NAME).about(ABOUT)), false, false, ACCEPT_SESSION_ARGS)
+        apply_common_creation_options(
+            add_args(Command::new(NAME).about(ABOUT)),
+            false,
+            false,
+            ACCEPT_SESSION_ARGS,
+        )
     }
 
     pub fn put_transaction_build() -> Command {
@@ -1525,10 +1599,14 @@ pub(super) mod transfer {
         matches: &ArgMatches,
     ) -> Result<(TransactionBuilderParams, TransactionStrParams), CliError> {
         let source_str = source::get(matches);
-        let source_uref = parse::uref(source_str)?;
+        let maybe_source = if let Some(source) = source_str {
+            Some(parse::uref(source)?)
+        } else {
+            None
+        };
 
         let target_str = target::get(matches);
-        let target_uref = parse::uref(target_str)?;
+        let target = parse::uref(target_str)?;
 
         let amount = transfer_amount::get(matches);
         let amount = transaction_amount::parse_transaction_amount(amount)?;
@@ -1542,10 +1620,9 @@ pub(super) mod transfer {
         let maybe_id = transfer_id::get(matches);
 
         let params = TransactionBuilderParams::Transfer {
-            source_uref,
-            target_uref,
+            maybe_source,
+            target,
             amount,
-            maybe_to,
             maybe_id,
         };
         let transaction_str_params = build_transaction_str_params(matches, ACCEPT_SESSION_ARGS);
@@ -1580,11 +1657,8 @@ pub(super) mod source {
             .display_order(DisplayOrder::Source as usize)
     }
 
-    pub fn get(matches: &ArgMatches) -> &str {
-        matches
-            .get_one::<String>(ARG_NAME)
-            .map(String::as_str)
-            .unwrap_or_else(|| panic!("should have {} arg", ARG_NAME))
+    pub fn get(matches: &ArgMatches) -> Option<&str> {
+        matches.get_one::<String>(ARG_NAME).map(String::as_str)
     }
 }
 
@@ -1725,7 +1799,8 @@ pub(super) fn build_transaction_str_params(
     let payment_amount = payment_amount::get(matches);
     let receipt = receipt::get(matches);
     let paid_amount = paid_amount::get(matches);
-
+    let strike_price = strike_price::get(matches);
+    let standard_payment = standard_payment::get(matches);
 
     let maybe_output_path = output::get(matches).unwrap_or_default();
     let initiator_addr = initiator_address::get(matches);
@@ -1747,6 +1822,8 @@ pub(super) fn build_transaction_str_params(
             gas_price,
             receipt,
             paid_amount,
+            strike_price,
+            standard_payment,
         }
     } else {
         TransactionStrParams {
@@ -1761,6 +1838,8 @@ pub(super) fn build_transaction_str_params(
             gas_price,
             receipt,
             paid_amount,
+            strike_price,
+            standard_payment,
             ..Default::default()
         }
     }
