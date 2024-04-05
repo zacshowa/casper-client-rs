@@ -589,7 +589,7 @@ fn version(value: &str) -> Result<Option<u32>, CliError> {
 
 pub(super) fn transfer_id(value: &str) -> Result<u64, CliError> {
     value.parse().map_err(|error| CliError::FailedToParseInt {
-        context: "transfer-id",
+        context: "transfer_id",
         error,
     })
 }
@@ -831,7 +831,7 @@ pub(super) fn pricing_mode(
                 maybe_gas_price_tolerance_str
                     .parse::<u8>()
                     .map_err(|error| CliError::FailedToParseInt {
-                        context: "gas-price-tolerance",
+                        context: "gas_price_tolerance",
                         error,
                     })?;
             let payment_amount = maybe_payment_amount_str.parse::<u64>().map_err(|error| {
@@ -855,7 +855,7 @@ pub(super) fn pricing_mode(
         "fixed" => {
             if maybe_gas_price_tolerance_str.is_empty() {
                 return Err(CliError::InvalidArgument {
-                    context: "gas-price-tolerance",
+                    context: "gas_price_tolerance",
                     error: "Gas price tolerance is required".to_string(),
                 });
             }
@@ -863,7 +863,7 @@ pub(super) fn pricing_mode(
                 maybe_gas_price_tolerance_str
                     .parse::<u8>()
                     .map_err(|error| CliError::FailedToParseInt {
-                        context: "gas-price-tolerance",
+                        context: "gas_price_tolerance",
                         error,
                     })?;
             Ok(PricingMode::Fixed {
@@ -879,7 +879,7 @@ pub(super) fn pricing_mode(
             }
             if maybe_paid_amount.is_none() {
                 return Err(CliError::InvalidArgument {
-                    context: "paid-amount",
+                    context: "paid_amount",
                     error: "Paid amount is required for reserved pricing mode".to_string(),
                 });
             }
@@ -902,7 +902,7 @@ pub(super) fn pricing_mode(
             })
         }
         _ => Err(CliError::InvalidArgument {
-            context: "pricing-mode",
+            context: "pricing_mode",
             error: "Invalid pricing mode identifier".to_string(),
         }),
     }
