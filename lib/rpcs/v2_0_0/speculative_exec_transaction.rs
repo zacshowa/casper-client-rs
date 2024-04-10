@@ -5,25 +5,20 @@ use casper_types::{
     Transaction,
 };
 
-use crate::rpcs::common::BlockIdentifier;
-
 pub(crate) const SPECULATIVE_EXEC_TXN_METHOD: &str = "speculative_exec_txn";
 
 /// Params for "speculative_exec_txn" RPC request.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct SpeculativeExecTxnParams {
-    /// Block hash on top of which to execute the transaction.
-    pub block_identifier: Option<BlockIdentifier>,
     /// Transaction to execute.
     pub transaction: Transaction,
 }
 
 impl SpeculativeExecTxnParams {
     /// Creates a new `SpeculativeExecTxnParams`.
-    pub fn new(block_identifier: Option<BlockIdentifier>, transaction: Transaction) -> Self {
+    pub fn new(transaction: Transaction) -> Self {
         SpeculativeExecTxnParams {
-            block_identifier,
             transaction,
         }
     }

@@ -193,17 +193,13 @@ pub async fn speculative_send_transaction_file(
     node_address: &str,
     verbosity_level: u64,
     input_path: &str,
-    maybe_speculative_exec_height_identifier: &str,
 ) -> Result<SuccessResponse<SpeculativeExecTxnResult>, CliError> {
     let rpc_id = parse::rpc_id(rpc_id_str);
     let verbosity_level = parse::verbosity(verbosity_level);
     let transaction = read_transaction_file(input_path).unwrap();
-    let maybe_speculative_exec_height_identifier =
-        parse::block_identifier(maybe_speculative_exec_height_identifier)?;
     speculative_exec_txn(
         rpc_id,
         node_address,
-        maybe_speculative_exec_height_identifier,
         verbosity_level,
         Transaction::V1(transaction),
     )

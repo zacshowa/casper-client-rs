@@ -1319,7 +1319,6 @@ pub(super) mod redelegate {
 pub(super) mod invocable_entity {
     use super::*;
     use casper_client::cli::{CliError, TransactionBuilderParams};
-    use casper_types::addressable_entity;
 
     pub const NAME: &str = "invocable-entity";
     const ACCEPT_SESSION_ARGS: bool = true;
@@ -1708,6 +1707,7 @@ pub(super) mod speculative_exec {
             .required(false)
             .value_name(ARG_VALUE_NAME)
             .num_args(0..=1)
+            .action(ArgAction::SetTrue)
             .default_missing_value(DEFAULT_MISSING_VALUE)
             .help(ARG_HELP)
             .display_order(DisplayOrder::SpeculativeExec as usize)
@@ -1717,8 +1717,8 @@ pub(super) mod speculative_exec {
     // None represents no --speculative-exec argument at all
     // Some("") represents a --speculative-exec with no/empty argument
     // Some(block_identifier) represents "--speculative-exec block_identifier"
-    pub(in crate::transaction) fn get(matches: &ArgMatches) -> Option<&str> {
-        matches.get_one::<String>(ARG_NAME).map(String::as_str)
+    pub(in crate::transaction) fn get(matches: &ArgMatches) -> bool {
+        *(matches.get_one::<bool>(ARG_NAME).unwrap_or(&false))
     }
 }
 
